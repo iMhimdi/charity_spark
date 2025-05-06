@@ -57,7 +57,7 @@ desktop.ini
 *.temp
 .env.local
 .env.*.local
-llm.txt
+
 
 # Coverage and testing
 .coverage
