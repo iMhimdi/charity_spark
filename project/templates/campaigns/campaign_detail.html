@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}{{ campaign.title }} | CharitySpark{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                {% if campaign.image %}
+                <img src="{{ campaign.image.url }}" class="card-img-top" alt="{{ campaign.title }}" style="max-height: 400px; object-fit: cover;">
+                {% else %}
+                <img src="https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg" class="card-img-top" alt="{{ campaign.title }}" style="max-height: 400px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body p-4">
+                    <h1 class="card-title mb-3">{{ campaign.title }}</h1>
+                    
+                    <div class="d-flex flex-wrap mb-4">
+                        <div class="me-4 mb-2">
+                            <i class="fas fa-user me-2"></i>
+                            <span>Created by {{ campaign.creator.get_full_name|default:campaign.creator.username }}</span>
+                        </div>
+                        <div class="me-4 mb-2">
+                            <i class="fas fa-folder me-2"></i>
+                            <span>{{ campaign.category.name }}</span>
+                        </div>
+                        <div class="me-4 mb-2">
+                            <i class="fas fa-calendar me-2"></i>
+                            <span>{{ campaign.days_remaining }} days left</span>
+                        </div>
+                    </div>
+                    
+                    <h5>Campaign Description</h5>
+                    <p class="card-text">{{ campaign.description|linebreaks }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4 sticky-top" style="top: 20px;">
+                <div class="card-body p-4">
+                    <h4 class="card-title mb-3">Fundraising Progress</h4>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="h5 mb-0">${{ campaign.current_amount }}</span>
+                            <span>of ${{ campaign.goal_amount }}</span>
+                        </div>
+                        <div class="progress mb-2" style="height: 15px;">
+                            <div class="progress-bar" role="progressbar" style="width: {{ campaign.progress_percentage }}%;" 
+                                aria-valuenow="{{ campaign.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>{{ campaign.progress_percentage }}% Funded</span>
+                            {% if campaign.is_completed %}
+                            <span class="badge bg-success">Goal Reached!</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'donations:donation_form' campaign_id=campaign.id %}" class="btn btn-success btn-lg btn-donate">
+                            <i class="fas fa-heart me-2"></i> Donate Now
+                        </a>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5>Campaign Details</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            <span>Created on {{ campaign.created_at|date:"F j, Y" }}</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-clock me-2"></i>
+                            <span>Ends on {{ campaign.end_date|date:"F j, Y" }}</span>
+                        </li>
+                    </ul>
+                    
+                    {% if campaign.creator == user %}
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'campaigns:campaign_edit' pk=campaign.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit me-2"></i> Edit Campaign
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Donations Section -->
+    <h3 class="mb-4 mt-2">Recent Donations</h3>
+    <div id="donations-container" class="row">
+        <div class="col-12 text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Campaigns -->
+    {% if related_campaigns %}
+    <h3 class="mb-4 mt-5">Related Campaigns</h3>
+    <div class="row">
+        {% for related in related_campaigns %}
+        <div class="col-md-4 mb-4">
+            <div class="card campaign-card h-100 shadow-sm">
+                {% if related.image %}
+                <img src="{{ related.image.url }}" class="card-img-top" alt="{{ related.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <img src="https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg" class="card-img-top" alt="{{ related.title }}" style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ related.title }}</h5>
+                    <p class="card-text text-muted mb-2">{{ related.description|truncatechars:100 }}</p>
+                    
+                    <div class="mt-3 mb-2">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>{{ related.progress_percentage }}%</span>
+                            <span>${{ related.current_amount }} of ${{ related.goal_amount }}</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: {{ related.progress_percentage }}%" 
+                                aria-valuenow="{{ related.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-auto pt-3 d-flex justify-content-between align-items-center">
+                        <small class="text-muted">{{ related.days_remaining }} days left</small>
+                        <a href="{% url 'campaigns:campaign_detail' pk=related.id %}" class="btn btn-outline-primary btn-sm">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fetch donations for this campaign
+        fetchDonations();
+        
+        function fetchDonations() {
+            const campaignId = '{{ campaign.id }}';
+            const donationsContainer = document.getElementById('donations-container');
+            
+            fetch(`/api/donations/?campaign=${campaignId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.results && data.results.length > 0) {
+                        let donationsHTML = '';
+                        
+                        data.results.forEach(donation => {
+                            donationsHTML += `
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between mb-3">
+                                                <h5 class="mb-0">$${donation.amount}</h5>
+                                                <span class="badge ${donation.simulated_payment_status === 'completed' ? 'bg-success' : 'bg-warning'}">${donation.simulated_payment_status}</span>
+                                            </div>
+                                            <p class="card-text mb-3">${donation.message || 'No message'}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <i class="fas fa-user-circle me-1"></i>
+                                                    <span class="text-muted">${donation.donor_name}</span>
+                                                </div>
+                                                <small class="text-muted">${new Date(donation.created_at).toLocaleDateString()}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        donationsContainer.innerHTML = donationsHTML;
+                    } else {
+                        donationsContainer.innerHTML = `
+                            <div class="col-12">
+                                <div class="alert alert-info text-center p-4">
+                                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                    <h5>No donations yet</h5>
+                                    <p>Be the first to support this campaign!</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching donations:', error);
+                    donationsContainer.innerHTML = `
+                        <div class="col-12">
+                            <div class="alert alert-danger text-center">
+                                <p>Failed to load donations. Please try again later.</p>
+                            </div>
+                        </div>
+                    `;
+                });
+        }
+    });
+</script>
+{% endblock %}

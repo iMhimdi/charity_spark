@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if campaign %}Edit{% else %}Create{% endif %} Campaign | CharitySpark{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h2 class="mb-0">{% if campaign %}Edit{% else %}Create{% endif %} Campaign</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div id="campaign-error-message" class="alert alert-danger d-none"></div>
+                    <div id="campaign-success-message" class="alert alert-success d-none"></div>
+                    
+                    <form id="campaign-form" enctype="multipart/form-data">
+                        {{ form|crispy }}
+                        
+                        <div class="d-grid gap-2 col-6 mx-auto mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                {% if campaign %}Update{% else %}Create{% endif %} Campaign
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const campaignForm = document.getElementById('campaign-form');
+        const errorMessage = document.getElementById('campaign-error-message');
+        const successMessage = document.getElementById('campaign-success-message');
+        const campaignId = '{{ campaign.id }}' || null;
+        const isEdit = !!campaignId;
+        
+        campaignForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(campaignForm);
+            
+            // API endpoint and method
+            const url = isEdit ? `/api/campaigns/${campaignId}/` : '/api/campaigns/';
+            const method = isEdit ? 'PATCH' : 'POST';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Token ${getAuthToken()}`,
+                        'X-CSRFToken': getCSRFToken(),
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Show success message
+                    successMessage.textContent = `Campaign ${isEdit ? 'updated' : 'created'} successfully!`;
+                    successMessage.classList.remove('d-none');
+                    
+                    // Redirect after a short delay
+                    setTimeout(() => {
+                        window.location.href = `/campaigns/${data.id}/`;
+                    }, 1500);
+                } else {
+                    // Format and display validation errors
+                    errorMessage.innerHTML = '';
+                    
+                    if (typeof data === 'object') {
+                        for (const field in data) {
+                            const message = Array.isArray(data[field]) ? data[field].join('<br>') : data[field];
+                            errorMessage.innerHTML += `<p><strong>${field}:</strong> ${message}</p>`;
+                        }
+                    } else {
+                        errorMessage.textContent = `Campaign ${isEdit ? 'update' : 'creation'} failed. Please try again.`;
+                    }
+                    
+                    errorMessage.classList.remove('d-none');
+                }
+            } catch (error) {
+                console.error('Campaign form error:', error);
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.classList.remove('d-none');
+            }
+        });
+    });
+</script>
+{% endblock %}

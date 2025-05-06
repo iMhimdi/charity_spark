@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Logout | CharitySpark{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow text-center p-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success fa-5x"></i>
+                </div>
+                <h2>Logged Out Successfully</h2>
+                <p class="mb-4">You have been logged out of your account. Thank you for using CharitySpark!</p>
+                <a href="{% url 'campaigns:campaign_list' %}" class="btn btn-primary">Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Clear authentication token and user data from localStorage
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+</script>
+{% endblock %}

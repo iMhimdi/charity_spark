@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register | CharitySpark{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-center mb-4">Create an Account</h2>
+                    
+                    <div id="register-error-message" class="alert alert-danger d-none"></div>
+                    
+                    <form id="register-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password1" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password1" name="password1" required>
+                            <div class="form-text">
+                                Your password must be at least 8 characters, and can't be too common.
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password2" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="password2" name="password2" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p>Already have an account? <a href="{% url 'accounts:api_login_page' %}">Login now</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const registerForm = document.getElementById('register-form');
+        const errorMessage = document.getElementById('register-error-message');
+        
+        registerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                password: document.getElementById('password1').value,
+                password2: document.getElementById('password2').value
+            };
+            
+            try {
+                const response = await fetch('/api/auth/register/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken(),
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store the token in localStorage
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Redirect to campaign list
+                    window.location.href = '{% url "campaigns:campaign_list" %}';
+                } else {
+                    // Format and display validation errors
+                    errorMessage.innerHTML = '';
+                    
+                    if (typeof data === 'object') {
+                        for (const field in data) {
+                            const message = Array.isArray(data[field]) ? data[field].join('<br>') : data[field];
+                            errorMessage.innerHTML += `<p><strong>${field}:</strong> ${message}</p>`;
+                        }
+                    } else {
+                        errorMessage.textContent = 'Registration failed. Please try again.';
+                    }
+                    
+                    errorMessage.classList.remove('d-none');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                errorMessage.textContent = 'An error occurred during registration. Please try again.';
+                errorMessage.classList.remove('d-none');
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Login | CharitySpark{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-center mb-4">Login to Your Account</h2>
+                    
+                    <div id="login-error-message" class="alert alert-danger d-none"></div>
+                    
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p>Don't have an account? <a href="{% url 'accounts:api_register_page' %}">Register now</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('login-form');
+        const errorMessage = document.getElementById('login-error-message');
+        
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/api/auth/login/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken(),
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store the token in localStorage
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Redirect to campaign list or the page they were trying to access
+                    const nextUrl = new URLSearchParams(window.location.search).get('next');
+                    window.location.href = nextUrl || '{% url "campaigns:campaign_list" %}';
+                } else {
+                    // Show error message
+                    errorMessage.textContent = data.error || 'Login failed. Please check your credentials.';
+                    errorMessage.classList.remove('d-none');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = 'An error occurred during login. Please try again.';
+                errorMessage.classList.remove('d-none');
+            }
+        });
+    });
+</script>
+{% endblock %}

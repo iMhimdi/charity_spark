@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Donate to {{ campaign.title }} | CharitySpark{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h2 class="mb-0">Donate to {{ campaign.title }}</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            {% if campaign.image %}
+                            <img src="{{ campaign.image.url }}" alt="{{ campaign.title }}" class="rounded me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                            {% else %}
+                            <img src="https://images.pexels.com/photos/3184433/pexels-photo-3184433.jpeg" alt="{{ campaign.title }}" class="rounded me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                            {% endif %}
+                            <div>
+                                <h5 class="mb-1">{{ campaign.title }}</h5>
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-user-circle me-1"></i> {{ campaign.creator.get_full_name|default:campaign.creator.username }}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress mb-2">
+                            <div class="progress-bar" role="progressbar" style="width: {{ campaign.progress_percentage }}%;" 
+                                aria-valuenow="{{ campaign.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>${{ campaign.current_amount }} raised of ${{ campaign.goal_amount }}</span>
+                            <span>{{ campaign.progress_percentage }}%</span>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div id="donation-error-message" class="alert alert-danger d-none"></div>
+                    
+                    <form id="donation-form">
+                        <input type="hidden" id="campaign-id" value="{{ campaign.id }}">
+                        
+                        <div class="mb-4">
+                            <label for="amount" class="form-label">Donation Amount ($)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="amount" name="amount" min="1" step="0.01" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="message" class="form-label">Add a supportive message (optional)</label>
+                            <textarea class="form-control" id="message" name="message" rows="3" placeholder="Your message of support..."></textarea>
+                        </div>
+                        
+                        <div class="mb-4 form-check">
+                            <input type="checkbox" class="form-check-input" id="anonymous" name="anonymous">
+                            <label class="form-check-label" for="anonymous">Make this donation anonymous</label>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5>Payment Information</h5>
+                            <p class="text-muted small">
+                                <i class="fas fa-info-circle me-1"></i> 
+                                This is a demo application. No real payment will be processed.
+                            </p>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Card Number</label>
+                                        <input type="text" class="form-control" placeholder="4242 4242 4242 4242" disabled>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Expiration</label>
+                                            <input type="text" class="form-control" placeholder="MM/YY" disabled>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">CVC</label>
+                                            <input type="text" class="form-control" placeholder="123" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg animate-pulse">Complete Donation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const donationForm = document.getElementById('donation-form');
+        const errorMessage = document.getElementById('donation-error-message');
+        const campaignId = document.getElementById('campaign-id').value;
+        
+        donationForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const amount = document.getElementById('amount').value;
+            const message = document.getElementById('message').value;
+            const anonymous = document.getElementById('anonymous').checked;
+            
+            try {
+                const response = await fetch('/api/donations/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken(),
+                        'Authorization': getAuthToken() ? `Token ${getAuthToken()}` : '',
+                    },
+                    body: JSON.stringify({
+                        campaign: campaignId,
+                        amount: amount,
+                        message: message,
+                        anonymous: anonymous
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Redirect to success page
+                    window.location.href = `/donations/success/${data.id}/`;
+                } else {
+                    // Format and display validation errors
+                    errorMessage.innerHTML = '';
+                    
+                    if (typeof data === 'object') {
+                        for (const field in data) {
+                            const message = Array.isArray(data[field]) ? data[field].join('<br>') : data[field];
+                            errorMessage.innerHTML += `<p><strong>${field}:</strong> ${message}</p>`;
+                        }
+                    } else {
+                        errorMessage.textContent = 'Donation failed. Please try again.';
+                    }
+                    
+                    errorMessage.classList.remove('d-none');
+                }
+            } catch (error) {
+                console.error('Donation error:', error);
+                errorMessage.textContent = 'An error occurred during the donation process. Please try again.';
+                errorMessage.classList.remove('d-none');
+            }
+        });
+    });
+</script>
+{% endblock %}

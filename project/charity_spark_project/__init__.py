@@ -1,0 +1,1 @@
+# Init file for the charity_spark_project package

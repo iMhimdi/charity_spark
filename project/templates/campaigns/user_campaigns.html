@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}My Campaigns | CharitySpark{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">My Campaigns</h1>
+            <p class="text-muted">Manage all your fundraising campaigns in one place.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{% url 'campaigns:campaign_create' %}" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i> Create New Campaign
+            </a>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">Total Campaigns</h6>
+                            <h3 class="mb-0">{{ campaigns|length }}</h3>
+                        </div>
+                        <i class="fas fa-list-alt fa-3x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">Active Campaigns</h6>
+                            <h3 class="mb-0">{{ active_campaigns }}</h3>
+                        </div>
+                        <i class="fas fa-check-circle fa-3x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">Total Raised</h6>
+                            <h3 class="mb-0">${{ total_raised }}</h3>
+                        </div>
+                        <i class="fas fa-dollar-sign fa-3x text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Campaigns Table -->
+    <div class="card shadow">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">Your Campaigns</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if campaigns %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Goal</th>
+                            <th>Progress</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for campaign in campaigns %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'campaigns:campaign_detail' pk=campaign.id %}" class="text-decoration-none">
+                                    {{ campaign.title }}
+                                </a>
+                            </td>
+                            <td>{{ campaign.category.name }}</td>
+                            <td>${{ campaign.goal_amount }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                        <div class="progress-bar" role="progressbar" style="width: {{ campaign.progress_percentage }}%;" 
+                                            aria-valuenow="{{ campaign.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <span class="text-muted small">{{ campaign.progress_percentage }}%</span>
+                                </div>
+                            </td>
+                            <td>
+                                {% if campaign.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                                
+                                {% if campaign.is_featured %}
+                                <span class="badge bg-warning text-dark ms-1">Featured</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ campaign.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'campaigns:campaign_detail' pk=campaign.id %}" class="btn btn-outline-primary" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'campaigns:campaign_edit' pk=campaign.id %}" class="btn btn-outline-secondary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center p-5">
+                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                <h4>No campaigns yet</h4>
+                <p class="mb-4">You haven't created any campaigns yet.</p>
+                <a href="{% url 'campaigns:campaign_create' %}" class="btn btn-primary">Create Your First Campaign</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
