@@ -92,8 +92,12 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="progress flex-grow-1 me-2" style="height: 8px;">
-                                        <div class="progress-bar" role="progressbar" style="width: {{ campaign.progress_percentage }}%;" 
-                                            aria-valuenow="{{ campaign.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        <div class="progress-bar" role="progressbar"
+                                            data-progress="{{ campaign.progress_percentage }}"
+                                            style="--progress: {{ campaign.progress_percentage }}"
+                                            aria-valuenow="{{ campaign.progress_percentage }}" 
+                                            aria-valuemin="0" 
+                                            aria-valuemax="100"></div>
                                     </div>
                                     <span class="text-muted small">{{ campaign.progress_percentage }}%</span>
                                 </div>

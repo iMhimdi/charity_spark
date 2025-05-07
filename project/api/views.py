@@ -120,7 +120,7 @@ class DonationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     
     def get_queryset(self):
-        queryset = Donation.objects.all()
+        queryset = Donation.objects.filter(simulated_payment_status='completed').order_by('-created_at')
         
         # Filter by campaign
         campaign = self.request.query_params.get('campaign')

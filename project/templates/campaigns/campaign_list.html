@@ -43,8 +43,14 @@
                                 <span>${{ campaign.current_amount }} of ${{ campaign.goal_amount }}</span>
                             </div>
                             <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: {{ campaign.progress_percentage }}%" 
-                                    aria-valuenow="{{ campaign.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                    data-progress="{{ campaign.progress_percentage }}"
+                                    style="--progress: {{ campaign.progress_percentage }}"
+                                    role="progressbar"
+                                    aria-valuenow="{{ campaign.progress_percentage }}" 
+                                    aria-valuemin="0" 
+                                    aria-valuemax="100">
+                                </div>
                             </div>
                         </div>
                         
@@ -122,8 +128,14 @@
                                 <span>${{ campaign.current_amount }} of ${{ campaign.goal_amount }}</span>
                             </div>
                             <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: {{ campaign.progress_percentage }}%" 
-                                    aria-valuenow="{{ campaign.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                    data-progress="{{ campaign.progress_percentage }}"
+                                    style="--progress: {{ campaign.progress_percentage }}"
+                                    role="progressbar"
+                                    aria-valuenow="{{ campaign.progress_percentage }}" 
+                                    aria-valuemin="0" 
+                                    aria-valuemax="100">
+                                </div>
                             </div>
                         </div>
                         

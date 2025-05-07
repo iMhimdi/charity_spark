@@ -87,15 +87,44 @@
             z-index: 2;
         }
         
+        /* Progress bar utilities */
         .progress {
             height: 10px;
             border-radius: 5px;
-            position: relative;
-            z-index: 1;
+            background-color: rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
         
         .progress-bar {
             background-color: var(--secondary);
+            transition: width 0.6s ease-in-out;
+        }
+        
+        .progress-bar[data-progress] {
+            width: calc(var(--progress) * 1%) !important;
+        }
+        
+        .progress-bar-striped {
+            background-image: linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.15) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.15) 50%,
+                rgba(255, 255, 255, 0.15) 75%,
+                transparent 75%,
+                transparent
+            );
+            background-size: 1rem 1rem;
+        }
+        
+        .progress-bar-animated {
+            animation: progress-bar-stripes 1s linear infinite;
+        }
+        
+        @keyframes progress-bar-stripes {
+            from { background-position: 1rem 0; }
+            to { background-position: 0 0; }
         }
         
         .btn-donate {
@@ -252,10 +281,10 @@
                     <h5>CharitySpark</h5>
                     <p>Connecting generous hearts with meaningful causes since 2025.</p>
                     <div class="social-icons">
-                        <a href="https://facebook.com/charityspark" target="_blank"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://twitter.com/charityspark" target="_blank"><i class="fab fa-twitter"></i></a>
-                        <a href="https://instagram.com/charityspark" target="_blank"><i class="fab fa-instagram"></i></a>
-                        <a href="https://linkedin.com/company/charityspark" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
                 <div class="col-md-4 mb-4">
@@ -270,7 +299,7 @@
                 <div class="col-md-4 mb-4">
                     <h5>Newsletter</h5>
                     <p class="mb-3">Stay updated with our latest campaigns and impact stories.</p>
-                    <form class="mb-3">
+                    <form class="mb-3" onsubmit="event.preventDefault(); alert('Thank you for your interest! This is a demo newsletter signup.');">
                         <div class="input-group">
                             <input type="email" class="form-control" placeholder="Your email">
                             <button class="btn btn-primary" type="submit">Subscribe</button>

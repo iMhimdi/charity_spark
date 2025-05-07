@@ -1,0 +1,7 @@
+Django>=5.2
+djangorestframework>=3.14.0
+Pillow>=10.0.0  # For image handling
+django-crispy-forms>=2.1
+crispy-bootstrap4>=2022.1
+requests>=2.31.0  # For sample data creation
+python-dotenv>=1.0.0  # For environment variables

@@ -28,8 +28,12 @@
                         </div>
                         
                         <div class="progress mb-2">
-                            <div class="progress-bar" role="progressbar" style="width: {{ campaign.progress_percentage }}%;" 
-                                aria-valuenow="{{ campaign.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar" role="progressbar"
+                                data-progress="{{ campaign.progress_percentage }}"
+                                style="--progress: {{ campaign.progress_percentage }}"
+                                aria-valuenow="{{ campaign.progress_percentage }}" 
+                                aria-valuemin="0" 
+                                aria-valuemax="100"></div>
                         </div>
                         <div class="d-flex justify-content-between">
                             <span>${{ campaign.current_amount }} raised of ${{ campaign.goal_amount }}</span>
